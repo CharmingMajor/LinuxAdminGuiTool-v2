@@ -1,0 +1,12 @@
+{
+    "my-server": {
+        "name": "my-server",
+        "hostname": "localhost",
+        "port": 2222,
+        "username": "adminuser",
+        "auth_method": "Password",
+        "key_path": null,
+        "passphrase": null,
+        "password": "your-password-here"
+    }
+}

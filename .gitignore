@@ -1,0 +1,14 @@
+node_modules/
+client/dist/
+
+server/.env
+config/users.json
+config/ssh_connections.json
+config/app_data.db
+
+logs/*.txt
+logs/*.log
+
+*.log
+.DS_Store
+Thumbs.db

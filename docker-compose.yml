@@ -1,0 +1,109 @@
+services:
+  test-system-1:
+    build: 
+      context: ./docker
+      dockerfile: Dockerfile
+    container_name: linux-admin-test-1
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    hostname: test-system-1
+    networks:
+      - admin-net
+
+  test-system-2:
+    build: 
+      context: ./docker
+      dockerfile: Dockerfile
+    container_name: linux-admin-test-2
+    ports:
+      - "2223:22"
+    restart: unless-stopped
+    hostname: test-system-2
+    networks:
+      - admin-net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: linux-admin-db
+    environment:
+      POSTGRES_DB: linux_admin
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d linux_admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - admin-net
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: linux-admin-metabase
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: linux_admin
+      MB_DB_PORT: 5432
+      MB_DB_USER: admin
+      MB_DB_PASS: changeme
+      MB_DB_HOST: postgres
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - admin-net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: linux-admin-server
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./config:/app/config:rw
+      - ./logs:/app/logs:rw
+    environment:
+      - PORT=3001
+      - JWT_SECRET=linux-admin-gui-secret-change-in-production
+      - JWT_EXPIRES_IN=8h
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_DATABASE=linux_admin
+      - PG_USER=admin
+      - PG_PASSWORD=changeme
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - admin-net
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: linux-admin-client
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+    depends_on:
+      - server
+    networks:
+      - admin-net
+
+volumes:
+  pgdata:
+
+networks:
+  admin-net:
+    driver: bridge

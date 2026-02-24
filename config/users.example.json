@@ -1,0 +1,16 @@
+{
+    "senior": {
+        "password": "<bcrypt-hashed-password>",
+        "role": "senior",
+        "failed_attempts": 0,
+        "last_attempt": null,
+        "locked_until": null
+    },
+    "junior": {
+        "password": "<bcrypt-hashed-password>",
+        "role": "junior",
+        "failed_attempts": 0,
+        "last_attempt": null,
+        "locked_until": null
+    }
+}
